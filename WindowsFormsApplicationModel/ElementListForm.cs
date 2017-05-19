@@ -15,19 +15,21 @@ namespace Elements.View
         /// </summary>
         private List<IElement> _elements { get; set; }
 
-        private ElementsProject _elementsProject { get; set; }
+        /// <summary>
+        /// Хранит в себе информацию о проэкте
+        /// </summary>
+        private ElementsProject ElementsProject { get; set; }
 
+        /// <summary>
+        /// Объект класса бинарной сериализации
+        /// </summary>
         private BinaryFormatter formatter = new BinaryFormatter();
 
         /// <summary>
-        /// Объект класса SerializeElement
+        /// Сериализует и десериализует файлы
         /// </summary>
         private SerializeElement _serializeElement = new SerializeElement();
-
-        /// <summary>
-        /// Объект класса BinaryFormatter
-        /// </summary>
-        private BinaryFormatter _formatter = new BinaryFormatter();
+        
 
         /// <summary>
         /// Имя файла
@@ -53,30 +55,32 @@ namespace Elements.View
 
                     var elementsProject = (ElementsProject)formatter.Deserialize(fs);
 
-                    _elementsProject = elementsProject;
+                    ElementsProject = elementsProject;
 
-                    textBoxAngularFrequency.Text = _elementsProject.AngularFrequency.ToString();
-                    _fileName = _elementsProject.FileName;
+                    textBoxAngularFrequency.Text = ElementsProject.AngularFrequency.ToString();
+                    _fileName = ElementsProject.FileName;
                     Text = _fileName.Substring(_fileName.LastIndexOf("\\") + 1) + @" - SPO Laboratory Works";
 
-                    for (int i = 0; i < _elementsProject.Elements.Count; i++)
+                    for (int i = 0; i < ElementsProject.Elements.Count; i++)
                     {
-                        elementDataGridView.Rows.Add(_elementsProject.Elements[i].Name, _elementsProject.Elements[i].Value,
-                            _elementsProject.Elements[i].GetImpedance(Convert.ToDouble(textBoxAngularFrequency.Text)));
+                        elementDataGridView.Rows.Add(ElementsProject.Elements[i].Name, ElementsProject.Elements[i].Value,
+                            ElementsProject.Elements[i].GetImpedance(Convert.ToDouble(textBoxAngularFrequency.Text)));
 
                     }
                 }
             }
+            
+
             Text = _fileName;
             _elements = new List<IElement>();
 #if !DEBUG
             buttonRandom.Visible = false;
 #endif
             Text = FileNameGenerate.GenerateFileName(_fileName);
-            _elementsProject = new ElementsProject();
-            _elementsProject.Elements = _elements;
-            _elementsProject.AngularFrequency = Convert.ToDouble(textBoxAngularFrequency.Text);
-            _elementsProject.FileName = _fileName;
+            ElementsProject = new ElementsProject();
+            ElementsProject.Elements = _elements;
+            ElementsProject.AngularFrequency = Convert.ToDouble(textBoxAngularFrequency.Text);
+            ElementsProject.FileName = _fileName;
 
         }
 
@@ -111,7 +115,7 @@ namespace Elements.View
                     {
                         return;
                     }
-                    _elementsProject.Elements.Add(element);
+                    ElementsProject.Elements.Add(element);
 
                     if (element is Resistor)
                     {
@@ -142,7 +146,7 @@ namespace Elements.View
         /// <param name="e"></param>
         private void buttonRemove_Click(object sender, EventArgs e)
         {
-            if (_elementsProject.Elements.Count == 0)
+            if (ElementsProject.Elements.Count == 0)
             {
                 return;
             }
@@ -156,7 +160,7 @@ namespace Elements.View
                 {
                     int index = elementDataGridView.SelectedCells[0].RowIndex;
                     elementDataGridView.Rows.RemoveAt(index);
-                    _elementsProject.Elements.RemoveAt(index);
+                    ElementsProject.Elements.RemoveAt(index);
                     break;
                 }
                 case DialogResult.No:
@@ -186,10 +190,10 @@ namespace Elements.View
 
                 double angular = Convert.ToDouble(textBoxAngularFrequency.Text);
 
-                for (int i = 0; i < _elementsProject.Elements.Count; i++)
+                for (int i = 0; i < ElementsProject.Elements.Count; i++)
                 {
                     elementDataGridView.Rows[i].Cells[2].Value =
-                        _elementsProject.Elements[i].GetImpedance(Convert.ToDouble((angular)));
+                        ElementsProject.Elements[i].GetImpedance(Convert.ToDouble((angular)));
                 }
                 Text = FileNameGenerate.AsteriskChange(true, _fileName);
             }
@@ -207,7 +211,7 @@ namespace Elements.View
         /// <param name="e"></param>
         private void buttonEdit_Click(object sender, EventArgs e)
         {
-            if (_elementsProject.Elements.Count == 0)
+            if (ElementsProject.Elements.Count == 0)
             {
                 return;
             }
@@ -216,12 +220,12 @@ namespace Elements.View
 
             var form = new ElementForm
             {
-                Element = _elementsProject.Elements[index]
+                Element = ElementsProject.Elements[index]
             };
             form.ShowDialog();
             var element = form.Element;
-            _elementsProject.Elements.RemoveAt(index);
-            _elementsProject.Elements.Insert(index, element);
+            ElementsProject.Elements.RemoveAt(index);
+            ElementsProject.Elements.Insert(index, element);
             elementDataGridView.Rows.RemoveAt(index);
 
             if (element is Resistor)
@@ -249,9 +253,9 @@ namespace Elements.View
         /// <param name="e"></param>
         private void saveToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            _elementsProject.FileName = _fileName;
-            _elementsProject.AngularFrequency = Convert.ToDouble(textBoxAngularFrequency.Text);
-            _serializeElement.Serilization(_elementsProject);
+            ElementsProject.FileName = _fileName;
+            ElementsProject.AngularFrequency = Convert.ToDouble(textBoxAngularFrequency.Text);
+            _serializeElement.Serilization(ElementsProject);
             Text = FileNameGenerate.AsteriskChange(false, _fileName);
             _saveFile = false;
         }
@@ -266,31 +270,31 @@ namespace Elements.View
             try
             {
                 var elementsProject = _serializeElement.Deserilization();
-                if (_elementsProject == null)
+                if (ElementsProject == null)
                 {
                     return;
                 }
 
-                _elementsProject.Elements.Clear();
+                ElementsProject.Elements.Clear();
                 elementDataGridView.Rows.Clear();
 
-                _elementsProject = elementsProject;
+                ElementsProject = elementsProject;
 ;
-                textBoxAngularFrequency.Text = _elementsProject.AngularFrequency.ToString();
-                _fileName = _elementsProject.FileName;
+                textBoxAngularFrequency.Text = ElementsProject.AngularFrequency.ToString();
+                _fileName = ElementsProject.FileName;
                 Text = _fileName.Substring(_fileName.LastIndexOf("\\") + 1) + @" - SPO Laboratory Works";
 
-                for (int i = 0; i < _elementsProject.Elements.Count; i++)
+                for (int i = 0; i < ElementsProject.Elements.Count; i++)
                 {
-                    elementDataGridView.Rows.Add(_elementsProject.Elements[i].Name, _elementsProject.Elements[i].Value,
-                        _elementsProject.Elements[i].GetImpedance(Convert.ToDouble(textBoxAngularFrequency.Text)));
+                    elementDataGridView.Rows.Add(ElementsProject.Elements[i].Name, ElementsProject.Elements[i].Value,
+                        ElementsProject.Elements[i].GetImpedance(Convert.ToDouble(textBoxAngularFrequency.Text)));
 
                 }
                 _saveFile = false;
             }
             catch (SerializationException)
             {
-                MessageBox.Show("Error with File");
+                MessageBox.Show(@"Error with File");
             }
         }
 
@@ -315,7 +319,7 @@ namespace Elements.View
             try
             {
                 var newRandomElements = RandomElementGenerate.CreateRandomElement();
-                _elementsProject.Elements.Add(newRandomElements);
+                ElementsProject.Elements.Add(newRandomElements);
 
                 if (newRandomElements is Resistor)
                 {
@@ -352,7 +356,7 @@ namespace Elements.View
         /// <param name="e"></param>
         private void buttonSearch_Click_1(object sender, EventArgs e)
         {
-            var form = new SearchForm(_elementsProject.Elements.ToList(), textBoxAngularFrequency.Text);
+            var form = new SearchForm(ElementsProject.Elements.ToList(), textBoxAngularFrequency.Text);
             form.Show();
 
         }
@@ -364,13 +368,13 @@ namespace Elements.View
         /// <param name="e"></param>
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_elementsProject.Elements.Count == 0)
+            if (ElementsProject.Elements.Count == 0)
             {   
                 var saveFileDialog = new SaveFileDialog();
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     _fileName = saveFileDialog.FileName;
-                    Text = _fileName.Substring(_fileName.LastIndexOf("\\") + 1) + " - SPO Laboratory Works";
+                    Text = _fileName.Substring(_fileName.LastIndexOf("\\") + 1) + @" - SPO Laboratory Works";
                 }
                 else
                 {
@@ -385,10 +389,10 @@ namespace Elements.View
             {
                 case DialogResult.Yes:
                 {
-                        _elementsProject.AngularFrequency = Convert.ToDouble(textBoxAngularFrequency.Text);
-                        _elementsProject.FileName = _fileName;
-                        _serializeElement.Serilization(_elementsProject);
-                        _elementsProject.Elements.Clear();
+                        ElementsProject.AngularFrequency = Convert.ToDouble(textBoxAngularFrequency.Text);
+                        ElementsProject.FileName = _fileName;
+                        _serializeElement.Serilization(ElementsProject);
+                        ElementsProject.Elements.Clear();
                         elementDataGridView.Rows.Clear();
                         textBoxAngularFrequency.Text = "";
                         _fileName = "C:\\Users\\User\\Documents\\New List";
@@ -398,7 +402,7 @@ namespace Elements.View
                 case DialogResult.No:
                     {
 
-                        _elementsProject.Elements.Clear();
+                        ElementsProject.Elements.Clear();
                         elementDataGridView.Rows.Clear();
                         textBoxAngularFrequency.Text = "";
                         _fileName = "C:\\Users\\User\\Documents\\New List";
@@ -420,7 +424,7 @@ namespace Elements.View
         /// <param name="e"></param>
         private void ElementListForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (_elementsProject.Elements.Count != 0 && _saveFile)
+            if (ElementsProject.Elements.Count != 0 && _saveFile)
             {
                 var dialogResultForms = MessageBox.Show(@"Do you want to save file?", @"Close file",
                     MessageBoxButtons.YesNoCancel);
@@ -429,9 +433,9 @@ namespace Elements.View
                 {
                     case DialogResult.Yes:
                     {
-                        _elementsProject.AngularFrequency = Convert.ToDouble(textBoxAngularFrequency.Text);
-                        _elementsProject.FileName = _fileName;
-                        _serializeElement.Serilization(_elementsProject);
+                        ElementsProject.AngularFrequency = Convert.ToDouble(textBoxAngularFrequency.Text);
+                        ElementsProject.FileName = _fileName;
+                        _serializeElement.Serilization(ElementsProject);
                         break;
                     }
                     case DialogResult.Cancel:
@@ -451,7 +455,7 @@ namespace Elements.View
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "txt files (*.el)|*.el";
+            saveFileDialog.Filter = @"txt files (*.el)|*.el";
             saveFileDialog.RestoreDirectory = true;
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -462,9 +466,9 @@ namespace Elements.View
             {
                 return;
             }
-            _elementsProject.AngularFrequency = Convert.ToDouble(textBoxAngularFrequency.Text);
-            _elementsProject.FileName = _fileName;
-            _serializeElement.Serilization(_elementsProject);
+            ElementsProject.AngularFrequency = Convert.ToDouble(textBoxAngularFrequency.Text);
+            ElementsProject.FileName = _fileName;
+            _serializeElement.Serilization(ElementsProject);
             Text = FileNameGenerate.AsteriskChange(false, _fileName);
             _saveFile = false;
         }

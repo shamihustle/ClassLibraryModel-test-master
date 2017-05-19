@@ -9,6 +9,9 @@ using System.Numerics;
 
 namespace UnitTests.Elements
 {
+    /// <summary>
+    /// Тестирование класса Resistor
+    /// </summary>
     [TestFixture]
     class ResistorTest
     {

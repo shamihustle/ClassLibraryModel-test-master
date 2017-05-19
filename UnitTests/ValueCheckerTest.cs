@@ -11,6 +11,11 @@ namespace UnitTests.Elements
     [TestFixture]
     class ValueCheckerTest
     {
+        /// <summary>
+        /// Тестирование класса ValueChecker
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         [Test]
         [TestCase(1, ExpectedResult = 1, TestName = "Testing Count for Assignment 1")]
         [TestCase(-1, ExpectedException = typeof(ArgumentException), TestName = "Testing Count for Assignment -1")]

@@ -9,6 +9,9 @@ using Elements;
 
 namespace UnitTests.Elements
 {
+    /// <summary>
+    /// Тестирование класса Inductor
+    /// </summary>
     [TestFixture]
     class InductorTest
     {
